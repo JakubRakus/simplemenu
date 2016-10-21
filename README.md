@@ -1,1 +1,3 @@
 # simplemenu
+
+Simple generic menu.

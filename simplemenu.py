@@ -1,21 +1,21 @@
 #! /usr/bin/env python3
 
-from sortedcontainers import SortedDict
+from exordereddict import ExOrderedDict
 
 class simpleMenu:
 
-	def __init__(self,mtitle,mtype='main',vlines=4,bcaption='Back'):
-		self.menuType = mtype
-		self.menuTitle = mtitle
-		self.visibleLines = vlines
-		self.elementDict = SortedDict()
-		self.addElement('back',bcaption,'s')
+	def __init__(self,mTitle,mType='main',vLines=4,bCaption='Back'):
+		self.menuType = mType
+		self.menuTitle = mTitle
+		self.visibleLines = vLines
+		self.elementDict = ExOrderedDict()
+		self.elementDict.update({'back':[bCaption,'s']})
 
-	def addElement(self,ename,ecaption,etype):
-		self.elementDict[ename]=[ecaption,etype]
+	def addElement(self,eName,eCaption,eType):
+		self.elementDict.insert({eName:[eCaption,eType]},before='back')
 
-	def delElement(self,ename):
-		del self.elementDict[ename]
+	def delElement(self,eName):
+		del self.elementDict[eName]
 
 	def getMenu(self):
 		return list(i for i in self.elementDict.values())
