@@ -2,39 +2,59 @@
 
 from exordereddict import ExOrderedDict
 
-allowedMenuTypes = ('main','sub')
-allowedElementTypes = ('s','c','m')
+class SMCommand:
 
-class simpleMenu:
+    def __init__(self,comCaption,comFunc=None):
+        self.caption = comCaption
+        self.func = comFunc
 
-    def __init__(self,mTitle,mType='main',vLines=4,bCaption='Back',eCaption='Exit'):
-        if mType not in allowedMenuTypes:
-            raise ValueError('Invalid mType, allowed types: {0}'.format(allowedMenuTypes))
-        self.menuType = mType
-        self.menuTitle = mTitle
+class SMRadio:
+
+    def __init__(self,radioCaption,radioGroup,radioFunc=None,radioChecked=False):
+        self.caption = radioCaption
+        self.group = radioGroup
+        self.func = radioFunc
+        self.checked = radioChecked
+
+class SMCheckBox:
+
+    def __init__(self,cbCaption,cbFunc=None,cbChecked=False):
+        self.caption = cbCaption
+        self.func = cbFunc
+        self.checked = cbChecked
+
+class SMSpecial(SMCommand): pass
+
+class SimpleMenu:
+
+    def __init__(self,mTitle,vLines=4,bCaption='Back'):
+        self.title = mTitle
         if vLines < 1:
             raise ValueError('vLines should be greater than 0')
-        self.visibleLines = vLines
-        self.elementDict = ExOrderedDict()
-        if self.menuType == 'sub':
-            self.elementDict.update({'back':[bCaption,'s']})
-        self.elementDict.update({'exit':[eCaption,'s']})
+        self.lines = vLines
+        self.elems = ExOrderedDict()
+        self.elems['back'] = SMSpecial(bCaption)
 
-    def addElement(self,eName,eCaption,eType):
-        if eType not in allowedElementTypes:
-            raise ValueError('invalid eType, allowed types: {0}'.format(allowedElementTypes))
-        bElement = 'back' if self.menuType == 'sub' else 'exit'
-        self.elementDict.insert({eName:[eCaption,eType]},before=bElement)
+    def addElement(self,eName,eType,*args,**kwargs):
+        self.elems.insert({eName:eType(*args,**kwargs)},before='back')
 
     def delElement(self,eName):
-        del self.elementDict[eName]
+        del self.elems[eName]
 
     def getMenu(self):
-        return list(i for i in self.elementDict.items())
+        return list(self.elems.items())
+
+    def showTree(self,prefix=''):
+        for key, value in self.elems.items():
+            print("{0} |-- {1}: {2}".format(prefix,key,value))
+            if type(value) is SimpleMenu:
+                self.elems[key].showTree(prefix+'    ')
 
 if __name__ == '__main__':
-    menu = simpleMenu('Title')
-    menu.addElement('com1','Command 1','c')
-    menu.addElement('com2','Command 2','c')
-    menu.addElement('sub1','Submenu 1','m')
-    print(menu.getMenu())
+    menu = SimpleMenu('Title')
+    menu.addElement('com1',SMCommand,'Command 1')
+    menu.addElement('com2',SMCommand,'Command 2')
+    menu.addElement('sub1',SimpleMenu,'Submenu 1')
+    menu.elems['sub1'].addElement('com3',SMCommand,'Command 3')
+    menu.elems['sub1'].addElement('sub2',SimpleMenu,'Submenu 2')
+    menu.showTree()
