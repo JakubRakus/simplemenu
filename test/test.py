@@ -42,7 +42,7 @@ if __name__ == "__main__":
     print(menu.sub1)
     print(menu.getActualLevel())
     print(menu.getActualView())
-    menu.moveInside('sub1')
+    menu.moveInside(menu.sub1.sub2)
     print(menu.getActualLevel())
     print(menu.getActualView())
     menu.moveBack()

@@ -66,6 +66,7 @@ class SimpleMenu(SMElement):
 
     def addElement(self, eName, eType, *args, **kwargs):
         self.__elements.insert({eName:eType(*args, **kwargs)}, before='back')
+        #if new element is submenu, tell him 'Submenu, I'm Your father'
         if eType is SimpleMenu:
             self.__elements[eName].__parentMenu = weakref.ref(self)
             self.__elements[eName].__actualLevel = False
@@ -78,9 +79,9 @@ class SimpleMenu(SMElement):
         self.__focused = 0
 
     def getActualLevel(self):
-        if self.__actualLevel:
+        if self.__actualLevel: #ok, I'm the active level
             return self
-        else:
+        else: #no, I'm not the active level, search my submenus
             for key, value in self.__elements.items():
                 if type(value) is SimpleMenu:
                     return self.__elements[key].getActualLevel()
@@ -91,11 +92,13 @@ class SimpleMenu(SMElement):
 
     def moveUp(self):
         level = self.getActualLevel()
+        #we are at the first item, wrap around
         if level.__focused <= 0:
             level.__focused = len(level.__elements) - 1
             level.__firstToShow = level.__focused - level.lines + 1
             if level.__firstToShow < 0:
                 level.__firstToShow = 0
+        #not the first item, just move up
         else:
             level.__focused -= 1
             if level.__focused < level.__firstToShow:
@@ -103,23 +106,43 @@ class SimpleMenu(SMElement):
 
     def moveDown(self):
         level = self.getActualLevel()
+        #we are at the last item, wrap around
         if level.__focused >= (len(level.__elements) - 1):
             level.__focused = 0
             level.__firstToShow = 0
+        #not the last item, just move down
         else:
             level.__focused += 1
             if level.__focused >= (level.__firstToShow + level.lines):
                 level.__firstToShow += 1
 
+    #only one level down in hierarchy
     def moveInside(self, submenu):
         level = self.getActualLevel()
-        if submenu in level.__elements.keys():
-            level.__elements[submenu].__actualLevel = True
-            level.__actualLevel = False
+        #we have to go deeper, change active level
+        if type(submenu) is str:
+            if submenu in level.__elements.keys():
+                level.__elements[submenu].__actualLevel = True
+                level.__actualLevel = False
+            else:
+                raise AttributeError('There is no \'{0}\' submenu at active level'.format(submenu))
+        else:
+            raise TypeError('Provided argument \'{0}\' is not a name of menu element'.format(submenu))
 
+    #go to arbitrary chosen submenu
+    def moveToSubmenu(self, submenu):
+        level = self.getActualLevel()
+        if type(submenu) is SimpleMenu:
+            submenu.__actualLevel = True
+            level.__actualLevel = False
+        else:
+            raise TypeError('Element \'{0}\' is not a submenu'.format(submenu))
+
+    #only one level up in hierarchy
     def moveBack(self):
         level = self.getActualLevel()
         level.__actualLevel = False
+        #call __parentMenu like a method() because of weak reference
         level.__parentMenu().__actualLevel = True
 
     def getElemProperties(self, element):
