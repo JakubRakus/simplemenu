@@ -1,6 +1,0 @@
-*.[oa]
-*~
-*.bat
-bin/
-__pycache__/
-*.geany

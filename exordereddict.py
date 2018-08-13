@@ -6,18 +6,18 @@ from collections import OrderedDict
 
 class ExOrderedDict(OrderedDict):
 
-    def insert(self, newElement, after=None, before=None):
-        dictKeys = list(self.keys())
+    def insert(self, new_element, after=None, before=None):
+        dict_keys = list(self.keys())
         if after is not None and before is None:
-            insPoint = dictKeys.index(after)+1
+            ins_point = dict_keys.index(after) + 1
         elif after is None and before is not None:
-            insPoint = dictKeys.index(before)
+            ins_point = dict_keys.index(before)
         else:
             raise SyntaxError('after or before should be set, but not simultanously')
-        firstPart = ExOrderedDict((k,self[k]) for k in dictKeys[:insPoint])
-        secondPart = ExOrderedDict((k,self[k]) for k in dictKeys[insPoint:])
+        first_part = ExOrderedDict((k,self[k]) for k in dict_keys[:ins_point])
+        second_part = ExOrderedDict((k,self[k]) for k in dict_keys[ins_point:])
         self.clear()
-        for elem in [firstPart, newElement, secondPart]:
+        for elem in [first_part, new_element, second_part]:
             self.update(elem)
 
 
