@@ -13,7 +13,7 @@ class ExOrderedDict(OrderedDict):
         elif after is None and before is not None:
             ins_point = dict_keys.index(before)
         else:
-            raise SyntaxError('after or before should be set, but not simultanously')
+            raise SyntaxError('after or before should be set, but not simultaneously')
         first_part = ExOrderedDict((k,self[k]) for k in dict_keys[:ins_point])
         second_part = ExOrderedDict((k,self[k]) for k in dict_keys[ins_point:])
         self.clear()
